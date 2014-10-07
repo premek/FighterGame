@@ -20,8 +20,9 @@ assets.puddititle = love.graphics.newImage("assets/puddititle.png")
 assets.title = love.graphics.newImage("assets/title.png")
 assets.bgcolor = {r = 3, g = 112, b = 194}
 assets.barcolor = {r = 255, g = 200, b = 80}
-assets.font = love.graphics.newFont("assets/Sniglet-Regular.ttf",32)
-assets.font_large = love.graphics.newFont("assets/Sniglet-Regular.ttf",64)
+assets.font = love.graphics.newFont(32)
+-- assets.font = love.graphics.newFont("assets/Sniglet-Regular.ttf",32)
+assets.font_large = love.graphics.newFont(64)
 
 introlib = {}
 

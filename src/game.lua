@@ -6,15 +6,14 @@ gamelib = {}
 function gamelib.load (arg)
   gamelib.dt_sprite = 0
   gamelib.state = "standing"
-  gamelib.playerx = 0
+  gamelib.playerx = 100
   gamelib.playery = 0
   gamelib.distance = 0
   gamelib.jump = false
   gamelib.jump_dt = 0
   gamelib.jump_speed = 1.5
   gamelib.dt_time = 0
-  gamelib.playersize = 11
-  gamelib.score = 0
+  gamelib.life = 10
   gamelib.score_time = 0
   gamelib.donuts = {}
   gamelib.donuts_dt = 0
@@ -22,8 +21,7 @@ function gamelib.load (arg)
   gamelib.px = 0
   gamelib.py = 0
   gamelib.win_cond = 100
-  gamelib.current_donuts = 0
-  gamelib.debug = true
+  gamelib.debug = true 
   gamelib.showhappy = 0
 end
 
@@ -53,8 +51,9 @@ function gamelib.update (dt)
       v.x = v.x - 800*dt
       d = math.sqrt((v.x+assets.donut[1]:getWidth()/2-gamelib.px)^2+(v.y+assets.donut[1]:getWidth()/2-gamelib.py)^2)
       if d < 77/2*gamelib.puddiscale  + assets.donut[1]:getWidth()/2 then
+        -- hit
         table.remove(gamelib.donuts,i)
-        gamelib.playersize = gamelib.playersize + 0.1
+        gamelib.life = gamelib.life - 10
         gamelib.showhappy = 8
       end
       if v.x < -200 then
@@ -62,33 +61,27 @@ function gamelib.update (dt)
       end
     end
     gamelib.dt_time = gamelib.dt_time + dt
-    if gamelib.dt_time > 8 and gamelib.state ~= "eating" then
-      gamelib.state = "eating"
-      gamelib.dt_sprite = 0
-    elseif gamelib.dt_time > 13 then
-      gamelib.state = "standing"
-      gamelib.dt_time = 0
-      gamelib.dt_sprite = 0
-      gamelib.playersize = gamelib.playersize-4
-      if gamelib.playersize < 10 then
-         gamelib.playersize = 0
-        state = "end"
-        endlib.playmusic()
-      end
+    if gamelib.life < 10 then
+      state = "end"
+      endlib.playmusic()
     end
+
     gamelib.dt_sprite = gamelib.dt_sprite + dt*2
+
     if love.keyboard.isDown("left") then
       gamelib.playerx = gamelib.playerx - 400*dt
-      if gamelib.playerx < -50 then
-        gamelib.playerx = -50
+      if gamelib.playerx < 50 then
+        gamelib.playerx = 50
+        gamelib.distance = gamelib.distance - 500*dt
       end
     elseif love.keyboard.isDown("right") then
       gamelib.playerx = gamelib.playerx + 400*dt
-      if gamelib.playerx > 400 then
-        gamelib.playerx = 400
+      if gamelib.playerx > 550 then -- rborder
+        gamelib.playerx = 550
         gamelib.distance = gamelib.distance + 500*dt
       end
     end
+    
     if gamelib.jump then
         gamelib.jump_dt = gamelib.jump_dt + dt*math.pi*gamelib.jump_speed
         if gamelib.jump_dt > math.pi then
@@ -97,13 +90,13 @@ function gamelib.update (dt)
         end
     end
   end
-  gamelib.score = math.floor(gamelib.playersize*(1/gamelib.score_time/60+1)*(gamelib.distance/100+400)/4)-1000
+  --gamelib.score = math.floor(gamelib.playersize*(1/gamelib.score_time/60+1)*(gamelib.distance/100+400)/4)-1000
   gamelib.playery = 500-math.sin(gamelib.jump_dt)*250
-  gamelib.current_donuts = math.floor((gamelib.playersize)*10)-100
-  if gamelib.current_donuts >= gamelib.win_cond then
-    state = "end"
-    endlib.playmusic()
-  end
+  -- gamelib.current_donuts = math.floor((gamelib.playersize)*10)-100
+  --if gamelib.life < 0  then
+  --  state = "end"
+  --  endlib.playmusic()
+  --end
 end
 
 -------------------------------------
@@ -128,10 +121,7 @@ function gamelib.draw ()
       gamelib.showhappy = gamelib.showhappy - 1 
       temp_sprite = 6
     end
-    if gamelib.state == "eating" then
-      temp_sprite = (math.floor(gamelib.dt_sprite % 8) + 6 ) % 11 + 1
-    end
-    gamelib.puddiscale = math.log(gamelib.playersize)*1.5 - 1
+    gamelib.puddiscale = math.log(11)*1.5 - 1
     love.graphics.draw(assets.puddi[temp_sprite],
         gamelib.playerx,
         gamelib.playery-235/2,
@@ -144,17 +134,17 @@ function gamelib.draw ()
       love.graphics.draw(assets.donut[v.s],v.x+assets.donut[1]:getWidth()/2,v.y+assets.donut[1]:getWidth()/2,v.r,1,1,assets.donut[1]:getWidth()/2,assets.donut[1]:getWidth()/2)
     end
     love.graphics.setColor(255,255,255)
-    love.graphics.setColor(assets.bgcolor.r,assets.bgcolor.g,assets.bgcolor.b)
+    --love.graphics.setColor(assets.bgcolor.r,assets.bgcolor.g,assets.bgcolor.b)
 
-    love.graphics.printf("Score:"..gamelib.score,32,558,736,"left")
-    love.graphics.printf(" Donuts:"..gamelib.current_donuts.."/"..gamelib.win_cond,32,558,736,"right")
+    --  love.graphics.printf("Score:"..gamelib.score,32,558,736,"left")
+    love.graphics.printf(gamelib.life,32,20, 10,"left")
     love.graphics.setColor(255,255,255)
     if gamelib.debug then
       love.graphics.circle("line", gamelib.px, gamelib.py, 77/2*gamelib.puddiscale,32)
       for _,v in ipairs(gamelib.donuts) do
         love.graphics.circle("line", v.x+assets.donut[1]:getWidth()/2, v.y+assets.donut[1]:getWidth()/2, assets.donut[1]:getWidth()/2,32)
       end
-      love.graphics.print("playersize:"..gamelib.playersize.."\nScore time:"..math.floor(gamelib.score_time).."\nDistance:"..math.floor(gamelib.distance).."\n",0,0)
+      love.graphics.print("Score time:"..math.floor(gamelib.score_time).."\nDistance:"..math.floor(gamelib.distance).."\n",0,0)
     end
   end  
 end

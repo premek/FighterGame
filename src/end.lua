@@ -13,9 +13,8 @@ end
 -------------------------------------
 function endlib.update (dt)
   if state == "end" then
-    love.graphics.setFont(assets.font_large)
     endlib.time_dt = endlib.time_dt + dt
-    endlib.alpha = endlib.alpha + dt*255/3
+    endlib.alpha = endlib.alpha + dt*255
     if endlib.alpha > 255 then
       endlib.alpha = 255
     end
@@ -27,24 +26,22 @@ end
 -------------------------------------
 function endlib.draw ()
   if state == "end" then
-    love.graphics.setColor(assets.bgcolor.r,assets.bgcolor.g,assets.bgcolor.b)
+    love.graphics.setFont(assets.font_large)
+    love.graphics.setColor(0,0,0)
     love.graphics.rectangle("fill",0,0,800,600)
-    love.graphics.setColor(255,255,255,endlib.alpha)
-    if gamelib.playersize > 0 then -- DAT ASS
+    love.graphics.setColor(255,0,0,endlib.alpha)
+    if gamelib.life > 0 then -- DAT ASS
       -- love.graphics.draw(assets.datpuddi,400-assets.datpuddi:getWidth()/2,600-assets.datpuddi:getHeight()-200)
       if endlib.time_dt > 3 then
         love.graphics.printf("DAT PUDDI",0,50,800,"center")
       end
       if endlib.time_dt > 5 then
-        love.graphics.printf("Score:"..gamelib.score,0,500,800,"center")
+        --love.graphics.printf("Score:"..gamelib.score,0,500,800,"center")
       end
     else -- SON I AM DISSAPOINT
       -- love.graphics.draw(assets.soniam,400-assets.soniam:getWidth()/2,600-assets.soniam:getHeight())
-      if endlib.time_dt > 3 then
-        love.graphics.printf("SON",0,50,800,"center")
-      end
-      if endlib.time_dt > 5 then
-        love.graphics.printf("I AM GIGA PUDDI.",0,500,800,"center")
+      if endlib.time_dt > 1 then
+        love.graphics.printf("YOU LOSE",0,50,800,"center")
       end
     end
   end  

@@ -22,7 +22,7 @@ function gamelib.load (arg)
   gamelib.py = 0
   gamelib.win_cond = 100
   gamelib.current_donuts = 0
-  gamelib.debug = false
+  gamelib.debug = true
   gamelib.showhappy = 0
 end
 

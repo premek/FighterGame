@@ -1,0 +1,7 @@
+src/git.lua
+dev/build_data/love-0.9.1-win32.zip
+dev/build_data/love-0.9.1-win64.zip
+dev/build_data/love.app/
+dev/build_data/love_i686/
+dev/build_data/love_x86_64/
+

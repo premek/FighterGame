@@ -2,7 +2,7 @@
 #Configure this, and also ensure you have the dev/build_data/osx.patch ready.
 SRC="src"
 NAME="GP"
-VERSION=0.8.0
+VERSION=0.9.1
 
 GIT=`git log --pretty=format:'%h' -n 1`
 GIT_COUNT=`git log --pretty=format:'' | wc -l`

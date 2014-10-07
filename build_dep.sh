@@ -1,6 +1,6 @@
 #!/bin/bash
 cd dev/build_data
-VERSION=0.8.0
+VERSION=0.9.1
 
 # linux 32-bit i686
 #mirror love_i686.tar.gz
@@ -11,11 +11,11 @@ tar xvf love_i686.tar.gz
 tar xvf love_x86_64.tar.gz
 
 # windows 32 bit
-wget -t 2 -c https://bitbucket.org/rude/love/downloads/love-$VERSION\-win-x86.zip
+wget -t 2 -c https://bitbucket.org/rude/love/downloads/love-$VERSION\-win32.zip
 unzip love-$VERSION\-win-x86.zip
 
 # windows 64 bit
-wget -t 2 -c https://bitbucket.org/rude/love/downloads/love-$VERSION\-win-x64.zip
+wget -t 2 -c https://bitbucket.org/rude/love/downloads/love-$VERSION\-win64.zip
 unzip love-$VERSION\-win-x64.zip
 
 # os x universal

@@ -11,6 +11,7 @@ function gamelib.load (arg)
   gamelib.distance = 0
   gamelib.jump = false
   gamelib.jump_dt = 0
+  gamelib.jump_speed = 1.5
   gamelib.dt_time = 0
   gamelib.playersize = 11
   gamelib.score = 0
@@ -33,7 +34,7 @@ function gamelib.update (dt)
   if state == "game" then
     gamelib.score_time = gamelib.score_time + dt
     gamelib.donuts_dt = gamelib.donuts_dt + dt
-    if gamelib.donuts_dt > 0.2 then
+    if gamelib.donuts_dt > 2 then
       local temp = {
         x = 900,
         y = math.random(50,450),
@@ -89,7 +90,7 @@ function gamelib.update (dt)
       end
     end
     if gamelib.jump then
-        gamelib.jump_dt = gamelib.jump_dt + dt*math.pi
+        gamelib.jump_dt = gamelib.jump_dt + dt*math.pi*gamelib.jump_speed
         if gamelib.jump_dt > math.pi then
           gamelib.jump_dt = 0
           gamelib.jump = false
@@ -97,7 +98,7 @@ function gamelib.update (dt)
     end
   end
   gamelib.score = math.floor(gamelib.playersize*(1/gamelib.score_time/60+1)*(gamelib.distance/100+400)/4)-1000
-  gamelib.playery = 600-math.sin(gamelib.jump_dt)*400
+  gamelib.playery = 500-math.sin(gamelib.jump_dt)*250
   gamelib.current_donuts = math.floor((gamelib.playersize)*10)-100
   if gamelib.current_donuts >= gamelib.win_cond then
     state = "end"
@@ -113,6 +114,12 @@ function gamelib.draw ()
     love.graphics.setColor(assets.bgcolor.r,assets.bgcolor.g,assets.bgcolor.b)
     love.graphics.rectangle("fill",0,0,800,600)
     love.graphics.setColor(255,255,255)
+
+    love.graphics.draw(assets.city,-gamelib.distance%800,(300-assets.city:getHeight()*800/assets.city:getWidth()),0,800/assets.city:getWidth())
+    love.graphics.draw(assets.city,-gamelib.distance%800-800,(300-assets.city:getHeight()*800/assets.city:getWidth()),0,800/assets.city:getWidth())
+    love.graphics.setColor(assets.barcolor.r,assets.barcolor.g,assets.barcolor.b)
+    love.graphics.rectangle("fill",0,300,800,600)
+
     local temp_sprite = 1
     if gamelib.state == "standing" then
       temp_sprite = math.floor(gamelib.dt_sprite % 2) + 4
@@ -136,10 +143,6 @@ function gamelib.draw ()
     for _,v in ipairs(gamelib.donuts) do
       love.graphics.draw(assets.donut[v.s],v.x+assets.donut[1]:getWidth()/2,v.y+assets.donut[1]:getWidth()/2,v.r,1,1,assets.donut[1]:getWidth()/2,assets.donut[1]:getWidth()/2)
     end
-    love.graphics.draw(assets.city,-gamelib.distance%800,(600-assets.city:getHeight()*800/assets.city:getWidth()),0,800/assets.city:getWidth())
-    love.graphics.draw(assets.city,-gamelib.distance%800-800,(600-assets.city:getHeight()*800/assets.city:getWidth()),0,800/assets.city:getWidth())
-    love.graphics.setColor(assets.barcolor.r,assets.barcolor.g,assets.barcolor.b)
-    love.graphics.rectangle("fill",0,550,800,600)
     love.graphics.setColor(255,255,255)
     love.graphics.setColor(assets.bgcolor.r,assets.bgcolor.g,assets.bgcolor.b)
 

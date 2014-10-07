@@ -1,7 +1,7 @@
 state = nil
-require("endlib/endlib")
-require("gamelib/gamelib")
-require("introlib/introlib")
+require("end")
+require("game")
+require("intro")
 
 -------------------------------------
 -- love.load

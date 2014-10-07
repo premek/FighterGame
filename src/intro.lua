@@ -1,10 +1,6 @@
 love.audio.setVolume(0.5)
-music = love.audio.newSource("assets/GigaPudding.mp3")
 music_intro = love.audio.newSource("assets/intro.mp3")
-music_end = love.audio.newSource("assets/end.mp3")
-music:setLooping(true)
 music_intro:setLooping(false)
-music_end:setLooping(false)
 love.audio.play(music_intro)
 
 assets = {}
@@ -21,11 +17,9 @@ for i = 1,12 do
   assets.puddi[i] = love.graphics.newImage("assets/puddi/"..i..".png")
 end
 assets.puddititle = love.graphics.newImage("assets/puddititle.png")
-assets.soniam = love.graphics.newImage("assets/soniam.png")
-assets.datpuddi = love.graphics.newImage("assets/datpuddi.png")
 assets.title = love.graphics.newImage("assets/title.png")
 assets.bgcolor = {r = 3, g = 112, b = 194}
-assets.barcolor = {r = 255, g = 159, b = 23}
+assets.barcolor = {r = 255, g = 200, b = 80}
 assets.font = love.graphics.newFont("assets/Sniglet-Regular.ttf",32)
 assets.font_large = love.graphics.newFont("assets/Sniglet-Regular.ttf",64)
 
@@ -91,7 +85,7 @@ function introlib.keypressed (key,unicode)
     else
       state = "game"
       love.audio.stop()
-      love.audio.play(music)
+      -- love.audio.play(music)
     end
   end  
 end

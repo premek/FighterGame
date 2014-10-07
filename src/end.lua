@@ -31,7 +31,7 @@ function endlib.draw ()
     love.graphics.rectangle("fill",0,0,800,600)
     love.graphics.setColor(255,255,255,endlib.alpha)
     if gamelib.playersize > 0 then -- DAT ASS
-      love.graphics.draw(assets.datpuddi,400-assets.datpuddi:getWidth()/2,600-assets.datpuddi:getHeight()-200)
+      -- love.graphics.draw(assets.datpuddi,400-assets.datpuddi:getWidth()/2,600-assets.datpuddi:getHeight()-200)
       if endlib.time_dt > 3 then
         love.graphics.printf("DAT PUDDI",0,50,800,"center")
       end
@@ -39,7 +39,7 @@ function endlib.draw ()
         love.graphics.printf("Score:"..gamelib.score,0,500,800,"center")
       end
     else -- SON I AM DISSAPOINT
-      love.graphics.draw(assets.soniam,400-assets.soniam:getWidth()/2,600-assets.soniam:getHeight())
+      -- love.graphics.draw(assets.soniam,400-assets.soniam:getWidth()/2,600-assets.soniam:getHeight())
       if endlib.time_dt > 3 then
         love.graphics.printf("SON",0,50,800,"center")
       end
@@ -70,7 +70,7 @@ end
 
 function endlib.playmusic()
   love.audio.stop()
-  love.audio.play(music_end)
+  -- love.audio.play(music_end)
 end
 -------------------------------------
 -- endlib.keyreleased

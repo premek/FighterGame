@@ -1,28 +1,52 @@
+require "class"
 gamelib = {}
+
+
+
+
+Player = class:new()
+    Player.x = 100 -- TODO position is relative to screen, not world
+    Player.y = 0
+    Player.jump = false
+    Player.jump_dt = 0
+    Player.jump_speed = 1.5
+    Player.life = 90
+    Player.controls = {
+      right = "right",
+      left = "left",
+      jump = "up"
+    }
+
+--Player.value = 13
+--function Player:setvalue(v)
+--    Player.value = v
+--end
+
+
+
+function dist(o1, o2)
+  return math.sqrt( (o1.x - o2.x)^2 +(o1.y - o2.y)^2) 
+end
+
 
 -------------------------------------
 -- gamelib.load
 -------------------------------------
 function gamelib.load (arg)
-  gamelib.dt_sprite = 0
-  gamelib.state = "standing"
-  gamelib.playerx = 100
-  gamelib.playery = 0
+
   gamelib.distance = 0
-  gamelib.jump = false
-  gamelib.jump_dt = 0
-  gamelib.jump_speed = 1.5
   gamelib.dt_time = 0
-  gamelib.life = 10
-  gamelib.score_time = 0
-  gamelib.donuts = {}
-  gamelib.donuts_dt = 0
-  gamelib.puddiscale = 1
-  gamelib.px = 0
-  gamelib.py = 0
-  gamelib.win_cond = 100
   gamelib.debug = true 
-  gamelib.showhappy = 0
+
+
+gamelib.players = {Player:new(), Player:new()}
+gamelib.players[2].x = 500
+gamelib.players[2].controls  = {
+      right = "d",
+      left = "a",
+      jump = "w"
+    }
+
 end
 
 -------------------------------------
@@ -30,73 +54,47 @@ end
 -------------------------------------
 function gamelib.update (dt)
   if state == "game" then
-    gamelib.score_time = gamelib.score_time + dt
-    gamelib.donuts_dt = gamelib.donuts_dt + dt
-    if gamelib.donuts_dt > 2 then
-      local temp = {
-        x = 900,
-        y = math.random(50,450),
-        s = math.random(1,5),
-        rd = math.random(-1,1),
-        r = 0
-      }
-      table.insert(gamelib.donuts,temp)
-      gamelib.donuts_dt = 0
-    end
-    gamelib.px = gamelib.playerx+77/2*gamelib.puddiscale
-    gamelib.py = gamelib.playery-61/2*gamelib.puddiscale
-    local d = 0
-    for i,v in ipairs(gamelib.donuts) do
-      v.r = v.r + v.rd*dt
-      v.x = v.x - 800*dt
-      d = math.sqrt((v.x+assets.donut[1]:getWidth()/2-gamelib.px)^2+(v.y+assets.donut[1]:getWidth()/2-gamelib.py)^2)
-      if d < 77/2*gamelib.puddiscale  + assets.donut[1]:getWidth()/2 then
-        -- hit
-        table.remove(gamelib.donuts,i)
-        gamelib.life = gamelib.life - 10
-        gamelib.showhappy = 8
-      end
-      if v.x < -200 then
-        table.remove(gamelib.donuts,i)
-      end
-    end
+
     gamelib.dt_time = gamelib.dt_time + dt
-    if gamelib.life < 10 then
-      state = "end"
-      endlib.playmusic()
-    end
 
-    gamelib.dt_sprite = gamelib.dt_sprite + dt*2
+    for i,p in ipairs(gamelib.players) do
+      if p.life < 10 then
+        state = "end"
+        endlib.playmusic()
+      end
 
-    if love.keyboard.isDown("left") then
-      gamelib.playerx = gamelib.playerx - 400*dt
-      if gamelib.playerx < 50 then
-        gamelib.playerx = 50
-        gamelib.distance = gamelib.distance - 500*dt
-      end
-    elseif love.keyboard.isDown("right") then
-      gamelib.playerx = gamelib.playerx + 400*dt
-      if gamelib.playerx > 550 then -- rborder
-        gamelib.playerx = 550
-        gamelib.distance = gamelib.distance + 500*dt
-      end
-    end
     
-    if gamelib.jump then
-        gamelib.jump_dt = gamelib.jump_dt + dt*math.pi*gamelib.jump_speed
-        if gamelib.jump_dt > math.pi then
-          gamelib.jump_dt = 0
-          gamelib.jump = false
-        end
+	    if p.jump then
+		p.jump_dt = p.jump_dt + dt*math.pi*p.jump_speed
+		if p.jump_dt > math.pi then
+		  p.jump_dt = 0
+		  p.jump = false
+		end
+	    end
+
+
+
+	    if love.keyboard.isDown(p.controls.left) then
+	      p.x = p.x - 400*dt
+	      if p.x < 50 then
+		p.x = 50
+		gamelib.distance = gamelib.distance - 500*dt
+	      end
+	    elseif love.keyboard.isDown(p.controls.right) then
+	      p.x = p.x + 400*dt
+	      if p.x > 550 then -- rborder
+		p.x = 550
+		gamelib.distance = gamelib.distance + 500*dt
+	      end
+	    end
+
+	  p.y = 500-math.sin(p.jump_dt)*250
+	  --if gamelib.player.life < 0  then
+	  --  state = "end"
+	  --  endlib.playmusic()
+	  --end
+	  end
     end
-  end
-  --gamelib.score = math.floor(gamelib.playersize*(1/gamelib.score_time/60+1)*(gamelib.distance/100+400)/4)-1000
-  gamelib.playery = 500-math.sin(gamelib.jump_dt)*250
-  -- gamelib.current_donuts = math.floor((gamelib.playersize)*10)-100
-  --if gamelib.life < 0  then
-  --  state = "end"
-  --  endlib.playmusic()
-  --end
 end
 
 -------------------------------------
@@ -114,37 +112,33 @@ function gamelib.draw ()
     love.graphics.rectangle("fill",0,300,800,600)
 
     local temp_sprite = 1
-    if gamelib.state == "standing" then
-      temp_sprite = math.floor(gamelib.dt_sprite % 2) + 4
-    end
-    if gamelib.showhappy > 0 then
-      gamelib.showhappy = gamelib.showhappy - 1 
-      temp_sprite = 6
-    end
-    gamelib.puddiscale = math.log(11)*1.5 - 1
+
+    for i,p in ipairs(gamelib.players) do
+
+    love.graphics.setColor(255,255,255)
     love.graphics.draw(assets.puddi[temp_sprite],
-        gamelib.playerx,
-        gamelib.playery-235/2,
+        p.x-77,
+        p.y-77,
         0,
-        gamelib.puddiscale/4,
-        gamelib.puddiscale/4,
+        .5,
+        .5,
         0,
         61)
-    for _,v in ipairs(gamelib.donuts) do
-      love.graphics.draw(assets.donut[v.s],v.x+assets.donut[1]:getWidth()/2,v.y+assets.donut[1]:getWidth()/2,v.r,1,1,assets.donut[1]:getWidth()/2,assets.donut[1]:getWidth()/2)
-    end
-    love.graphics.setColor(255,255,255)
-    --love.graphics.setColor(assets.bgcolor.r,assets.bgcolor.g,assets.bgcolor.b)
 
-    --  love.graphics.printf("Score:"..gamelib.score,32,558,736,"left")
-    love.graphics.printf(gamelib.life,32,20, 10,"left")
-    love.graphics.setColor(255,255,255)
+    love.graphics.printf(p.life,32+(i-1)*670,20, 10,"left")
+
+    end
+
     if gamelib.debug then
-      love.graphics.circle("line", gamelib.px, gamelib.py, 77/2*gamelib.puddiscale,32)
-      for _,v in ipairs(gamelib.donuts) do
-        love.graphics.circle("line", v.x+assets.donut[1]:getWidth()/2, v.y+assets.donut[1]:getWidth()/2, assets.donut[1]:getWidth()/2,32)
+
+      for i,p in ipairs(gamelib.players) do
+        love.graphics.circle("line", p.x, p.y, 3,8)
       end
-      love.graphics.print("Score time:"..math.floor(gamelib.score_time).."\nDistance:"..math.floor(gamelib.distance).."\n",0,0)
+
+      love.graphics.print(""
+          .."\nDistance:"..math.floor(gamelib.distance)
+          .."\nplx,ply:"..gamelib.players[1].x..","..gamelib.players[1].y
+          .."\n",0,0)
     end
   end  
 end
@@ -154,13 +148,19 @@ end
 -------------------------------------
 function gamelib.keypressed (key,unicode)
   if state == "game" then
-    if love.keyboard.isDown("up") and not gamelib.jump then
-      gamelib.jump = true
-      gamelib.jump_dt = 0
+
+    for i,p in ipairs(gamelib.players) do
+
+	    if love.keyboard.isDown(p.controls.jump) and not p.jump then
+	      p.jump = true
+	      p.jump_dt = 0
+	    end
     end
+
     if key == "`" then
       gamelib.debug = not gamelib.debug 
     end
+
   end  
 end
 

@@ -30,19 +30,11 @@ function endlib.draw ()
     love.graphics.setColor(0,0,0)
     love.graphics.rectangle("fill",0,0,800,600)
     love.graphics.setColor(255,0,0,endlib.alpha)
-    if gamelib.player.life > 0 then -- DAT ASS
-      -- love.graphics.draw(assets.datpuddi,400-assets.datpuddi:getWidth()/2,600-assets.datpuddi:getHeight()-200)
-      if endlib.time_dt > 3 then
-        love.graphics.printf("DAT PUDDI",0,50,800,"center")
-      end
-      if endlib.time_dt > 5 then
-      end
-    else -- SON I AM DISSAPOINT
+
       -- love.graphics.draw(assets.soniam,400-assets.soniam:getWidth()/2,600-assets.soniam:getHeight())
       if endlib.time_dt > 1 then
         love.graphics.printf("YOU LOSE",0,50,800,"center")
       end
-    end
   end  
 end
 

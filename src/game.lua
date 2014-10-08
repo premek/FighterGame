@@ -1,26 +1,6 @@
 require "class"
+require "player"
 gamelib = {}
-
-
-
-
-Player = class:new()
-    Player.x = 100 -- TODO position is relative to screen, not world
-    Player.y = 0
-    Player.jump = false
-    Player.jump_dt = 0
-    Player.jump_speed = 1.5
-    Player.life = 90
-    Player.controls = {
-      right = "right",
-      left = "left",
-      jump = "up"
-    }
-
---Player.value = 13
---function Player:setvalue(v)
---    Player.value = v
---end
 
 
 
@@ -28,24 +8,30 @@ function dist(o1, o2)
   return math.sqrt( (o1.x - o2.x)^2 +(o1.y - o2.y)^2) 
 end
 
+function collision(o1, o2, offset1, offset2)
+  return o1.x + offset1.x < o2.x + offset2.x + o2.w and
+         o2.x + offset2.x < o1.x + offset1.x + o1.w and
+         o1.y + offset1.y < o2.y + offset2.y + o2.h and
+         o2.y + offset2.y < o1.y + offset1.y + o1.h
+end
 
 -------------------------------------
 -- gamelib.load
 -------------------------------------
 function gamelib.load (arg)
 
-  gamelib.distance = 0
-  gamelib.dt_time = 0
-  gamelib.debug = true 
+  distance = 0 -- TODO ?
+  debug = true 
+  players = {Player:new(), Player:new()}
 
-
-gamelib.players = {Player:new(), Player:new()}
-gamelib.players[2].x = 500
-gamelib.players[2].controls  = {
+  players[2].x = 500
+  players[2].controls  = {
       right = "d",
       left = "a",
       jump = "w"
-    }
+  
+  }
+  players[2].pos = "right"
 
 end
 
@@ -55,15 +41,31 @@ end
 function gamelib.update (dt)
   if state == "game" then
 
-    gamelib.dt_time = gamelib.dt_time + dt
-
-    for i,p in ipairs(gamelib.players) do
+    for i,p in ipairs(players) do
       if p.life < 10 then
         state = "end"
         endlib.playmusic()
       end
 
-    
+      -- collisions
+      local me = p
+      for i,him in ipairs(players) do
+        if not (me == him) then -- reference comparsion - do not collide with self
+          
+          for i,myhitbox in ipairs(me.hitboxes) do
+          for i,hishitbox in ipairs(him.hitboxes) do
+		  
+		  if collision(myhitbox, hishitbox, me, him) then
+                      if hishitbox.type == "vulnerability" and myhitbox.type == "attack" then
+		      print ("HIT", him.pos);
+		      him.life = him.life - 0.001
+                    end
+		  end
+          end
+          end
+        end
+      end
+
 	    if p.jump then
 		p.jump_dt = p.jump_dt + dt*math.pi*p.jump_speed
 		if p.jump_dt > math.pi then
@@ -78,13 +80,13 @@ function gamelib.update (dt)
 	      p.x = p.x - 400*dt
 	      if p.x < 50 then
 		p.x = 50
-		gamelib.distance = gamelib.distance - 500*dt
+		distance = distance - 500*dt
 	      end
 	    elseif love.keyboard.isDown(p.controls.right) then
 	      p.x = p.x + 400*dt
 	      if p.x > 550 then -- rborder
 		p.x = 550
-		gamelib.distance = gamelib.distance + 500*dt
+		distance = distance + 500*dt
 	      end
 	    end
 
@@ -106,38 +108,20 @@ function gamelib.draw ()
     love.graphics.rectangle("fill",0,0,800,600)
     love.graphics.setColor(255,255,255)
 
-    love.graphics.draw(assets.city,-gamelib.distance%800,(300-assets.city:getHeight()*800/assets.city:getWidth()),0,800/assets.city:getWidth())
-    love.graphics.draw(assets.city,-gamelib.distance%800-800,(300-assets.city:getHeight()*800/assets.city:getWidth()),0,800/assets.city:getWidth())
+    love.graphics.draw(assets.city,-distance%800,(300-assets.city:getHeight()*800/assets.city:getWidth()),0,800/assets.city:getWidth())
+    love.graphics.draw(assets.city,-distance%800-800,(300-assets.city:getHeight()*800/assets.city:getWidth()),0,800/assets.city:getWidth())
     love.graphics.setColor(assets.barcolor.r,assets.barcolor.g,assets.barcolor.b)
     love.graphics.rectangle("fill",0,300,800,600)
 
-    local temp_sprite = 1
-
-    for i,p in ipairs(gamelib.players) do
-
-    love.graphics.setColor(255,255,255)
-    love.graphics.draw(assets.puddi[temp_sprite],
-        p.x-77,
-        p.y-77,
-        0,
-        .5,
-        .5,
-        0,
-        61)
-
-    love.graphics.printf(p.life,32+(i-1)*670,20, 10,"left")
+    for i,p in ipairs(players) do
+       p:draw()
 
     end
 
-    if gamelib.debug then
-
-      for i,p in ipairs(gamelib.players) do
-        love.graphics.circle("line", p.x, p.y, 3,8)
-      end
-
-      love.graphics.print(""
-          .."\nDistance:"..math.floor(gamelib.distance)
-          .."\nplx,ply:"..gamelib.players[1].x..","..gamelib.players[1].y
+    if debug then
+      love.graphics.print("\n"
+          .."\nDistance:"..math.floor(distance)
+          .."\nplx,ply:"..players[1].x..","..players[1].y
           .."\n",0,0)
     end
   end  
@@ -149,7 +133,7 @@ end
 function gamelib.keypressed (key,unicode)
   if state == "game" then
 
-    for i,p in ipairs(gamelib.players) do
+    for i,p in ipairs(players) do
 
 	    if love.keyboard.isDown(p.controls.jump) and not p.jump then
 	      p.jump = true
@@ -158,7 +142,7 @@ function gamelib.keypressed (key,unicode)
     end
 
     if key == "`" then
-      gamelib.debug = not gamelib.debug 
+      debug = not debug 
     end
 
   end  

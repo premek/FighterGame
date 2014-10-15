@@ -2,7 +2,7 @@ require "class"
 require "player"
 gamelib = {}
 
-
+frame = 0; -- FIXME move
 
 function dist(o1, o2)
   return math.sqrt( (o1.x - o2.x)^2 +(o1.y - o2.y)^2) 
@@ -25,13 +25,14 @@ function gamelib.load (arg)
   players = {Player:new(), Player:new()}
 
   players[2].x = 500
-  players[2].controls  = {
-      right = "d",
-      left = "a",
-      jump = "w"
-  
-  }
+  players[2].controls = {
+    right = "d",
+    left = "a",
+    jump = "w",
+    attack = "lctrl"
+  } 
   players[2].pos = "right"
+  players[2].facing = -1
 
 end
 
@@ -40,6 +41,8 @@ end
 -------------------------------------
 function gamelib.update (dt)
   if state == "game" then
+
+    frame = frame + dt * 12 -- TODO limit?
 
     for i,p in ipairs(players) do
       if p.life < 10 then
@@ -52,14 +55,12 @@ function gamelib.update (dt)
       for i,him in ipairs(players) do
         if not (me == him) then -- reference comparsion - do not collide with self
           
-          for i,myhitbox in ipairs(me.hitboxes) do
-          for i,hishitbox in ipairs(him.hitboxes) do
+          for myHitboxType, myHitbox in pairs(me.hitboxes) do
+          for hisHitboxType, hisHitbox in pairs(him.hitboxes) do
 		  
-		  if collision(myhitbox, hishitbox, me, him) then
-                      if hishitbox.type == "vulnerability" and myhitbox.type == "attack" then
+		  if hisHitboxType == "vulnerability" and myHitboxType == "attack" and collision(myHitbox, hisHitbox, me, him) then
 		      print ("HIT", him.pos);
-		      him.life = him.life - 0.001
-                    end
+		      him.life = him.life - 0.1
 		  end
           end
           end
@@ -74,15 +75,33 @@ function gamelib.update (dt)
 		end
 	    end
 
+	    if p.action then
+		p.action.dt = p.action.dt + dt
+		if p.action.dt > p.action.dur then
+		  p.action=nil
+		end
+
+                if p.action and p.action.name == "attack" then p.hitboxes.attack.x = 30
+                else p.hitboxes.attack.x = -10
+                end 
+                
+	    end
+
 
 
 	    if love.keyboard.isDown(p.controls.left) then
+              p.facing=-1
+-- FIXME
 	      p.x = p.x - 400*dt
-	      if p.x < 50 then
-		p.x = 50
+	      if p.x < 100 and p.x >= 0 then
+                if distance>0 then p.x = 100 end
 		distance = distance - 500*dt
 	      end
+	      if p.x < 0 then p.x = 0 end
+              
 	    elseif love.keyboard.isDown(p.controls.right) then
+              p.facing=1
+
 	      p.x = p.x + 400*dt
 	      if p.x > 550 then -- rborder
 		p.x = 550
@@ -90,7 +109,8 @@ function gamelib.update (dt)
 	      end
 	    end
 
-	  p.y = 500-math.sin(p.jump_dt)*250
+
+	  p.y = 530-math.sin(p.jump_dt)*250
 	  --if gamelib.player.life < 0  then
 	  --  state = "end"
 	  --  endlib.playmusic()
@@ -104,14 +124,12 @@ end
 -------------------------------------
 function gamelib.draw ()
   if state == "game" then
-    love.graphics.setColor(assets.bgcolor.r,assets.bgcolor.g,assets.bgcolor.b)
-    love.graphics.rectangle("fill",0,0,800,600)
     love.graphics.setColor(255,255,255)
 
-    love.graphics.draw(assets.city,-distance%800,(300-assets.city:getHeight()*800/assets.city:getWidth()),0,800/assets.city:getWidth())
-    love.graphics.draw(assets.city,-distance%800-800,(300-assets.city:getHeight()*800/assets.city:getWidth()),0,800/assets.city:getWidth())
-    love.graphics.setColor(assets.barcolor.r,assets.barcolor.g,assets.barcolor.b)
-    love.graphics.rectangle("fill",0,300,800,600)
+    local cityscale = 600/assets.city:getHeight();
+    if not debug then
+     love.graphics.draw(assets.city,-distance,0,0,cityscale)
+    end
 
     for i,p in ipairs(players) do
        p:draw()
@@ -119,9 +137,13 @@ function gamelib.draw ()
     end
 
     if debug then
+        love.graphics.setColor(255,255,255)
+        love.graphics.setNewFont(15)
+
       love.graphics.print("\n"
           .."\nDistance:"..math.floor(distance)
-          .."\nplx,ply:"..players[1].x..","..players[1].y
+          .."\nplx,ply:"..math.floor(players[1].x)..","..math.floor(players[1].y)
+          .."\nframe:"..math.floor(frame)
           .."\n",0,0)
     end
   end  
@@ -134,11 +156,15 @@ function gamelib.keypressed (key,unicode)
   if state == "game" then
 
     for i,p in ipairs(players) do
-
 	    if love.keyboard.isDown(p.controls.jump) and not p.jump then
 	      p.jump = true
 	      p.jump_dt = 0
-	    end
+
+	    elseif love.keyboard.isDown(p.controls.attack) and not p.action then
+              p.action = {name="attack", dt=0, dur=.2}
+       
+            end
+
     end
 
     if key == "`" then

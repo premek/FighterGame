@@ -1,7 +1,7 @@
 state = nil
 require("end")
-require("game")
 require("intro")
+require("game")
 
 -------------------------------------
 -- love.load
